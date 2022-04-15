@@ -23,7 +23,7 @@ d3.csv("lista_parlamentar.csv", function(d){
         var entourageName = card.select("#card_entourage_name");
         
         cardImg.attr("href", senator["img_ref"]);
-        nameText.text(senator["full_name"]);
+        nameText.text(senator["name"]);
         entourageName.text(senator["party_acronym"]);
 
         card.style("visibility", "visible");
@@ -65,39 +65,69 @@ d3.csv("lista_parlamentar.csv", function(d){
         "PSB": "#FFCC00",
         "PDT": "#FF0000",
         "REDE": "#379E8D",
-        "Cidadania": "#EC008C",
+        "CIDADANIA": "#EC008C",
         "PV": "#006600",
-        "Solidariedade": "#FF9C2B",
+        "SOLIDARIEDADE": "#FF9C2B",
         "AVANTE": "#ED5F36",
         "PSDB": "#0080FF",
         "MDB": "#30914D",
-        "PODE": "#2DA933",
-        "Independent": "#DDDDDD",
+        "PODEMOS": "#2DA933",
+        "INDEPENDENT": "#DDDDDD",
         "NOVO": "#FF4D00",
         "PROS": "#FF5460",
         "PSD": "#FFA500",
         "UNIAO": "#254AA5",
+        "PSL": "#254AA5",
+        "DEM":"#254AA5",
         "PL": "#0F0073",
         "PP": "#7DC9FF",
-        "Republicanos": "#005DAA",
+        "REPUBLICANOS": "#005DAA",
         "PTB": "#7B7B7B",
-        "PSC": "# 009118",
-        "Patriota": "# 00A29B",
+        "PSC": "#009118",
+        "PATRIOTA": "#00A29B",
     };
+
+    //var gS = {};
     
     data.forEach(function(item){
         var i = senatorObjs.findIndex(x => x["parlament_id"] == item["parlament_id"]);
         if(i <= -1 && item["parlament_id"] != ""){
             senatorObjs.push(item);
+
+            /*if (item["party_acronym"] in gS){
+                gS[item["party_acronym"]] += 1;
+            }else{
+                gS[item["party_acronym"]] = 1;
+            }*/
         }
     });
 
-    //console.log(senatorObjs);
+    //console.log(gS);
 
-    var svg = d3.select("svg");
     // style
-    var width = 360;
-    var height = 185;
+    var width = 720;
+    var height = 480;
+    
+    var cardWidth = 180;
+    var cardHeight = 150;
+    var cardBoarderRadius = 8;
+    var cardImageWidth = 100;
+    var cardImageHeight = 100;
+    var cardBackgroudColor = "#FFFFFF";
+    var cardTextAlign = "center";
+    var cardTextAnchor = "middle";
+    var cardTextFontFamily = "sans-serif"; 
+
+    var cardUserNamePos = {
+        "x": cardWidth / 2,
+        "y": 120
+    };
+
+    var cardEntourageNamePos = {
+        "x": cardWidth / 2,
+        "y": 140
+    };
+
     var circleRadius = 8;
     var textFontSize = 36;
     var textFontWeight = "bold";
@@ -114,25 +144,24 @@ d3.csv("lista_parlamentar.csv", function(d){
     var radiusPadding = 19;
     var startAngle = 0; // degree
     var endAngle = 180; // degree
-    var angleFromCenter = getAnglePadding(pointsOnLvl, startAngle, endAngle); // thats depends of the total of points
-    angleFromCenter = getAnglePadding(pointsOnLvl, startAngle, endAngle + angleFromCenter); // thats depends of the total of points
+    var angleFromCenter = getAnglePadding(pointsOnLvl, startAngle, endAngle);
+    angleFromCenter = getAnglePadding(pointsOnLvl, startAngle, endAngle + angleFromCenter); /// thats depends of the total of points
     //console.log(angleFromCenter);
     var textCenterPoint = {
         "x": 175,
         "y": 175
     };
-
-    // select
-    var mainGroup = svg.select("g");
-    var allGroups = mainGroup.selectAll("g");
-    var card = svg.select("#card");
     
+    /// adding points based on members
     for(; level < maxLevel; level++){
         var curPointsInLvl = 0;
         var angle = 0;
         
-        while(curPointsInLvl < pointsOnLvl){    
-            pointsPositions.push(positionBasedOn(textCenterPoint, radiusFromCenter, toRadian(angle)));
+        while(curPointsInLvl < pointsOnLvl){
+            var curPoint = positionBasedOn(textCenterPoint, radiusFromCenter, toRadian(angle));
+            curPoint["teta"] = angle;
+            curPoint["radius"] = radiusFromCenter;
+            pointsPositions.push(curPoint);
             angle += angleFromCenter;
             curPointsInLvl += 1;
         }
@@ -144,14 +173,50 @@ d3.csv("lista_parlamentar.csv", function(d){
         angleFromCenter = getAnglePadding(pointsOnLvl, startAngle, endAngle);
         angleFromCenter = getAnglePadding(pointsOnLvl, startAngle, endAngle + angleFromCenter);
     }
-    
 
     //console.log(pointsPositions);
 
+    var sortedSenatorByGroup = senatorObjs.slice(0) // copys the array;
+
+    /*for(let curPoint = 0, j = 0, base = 0, pointsOverLvls = 0, level = 0; j < pointsPositions.length; j++){
+        curPoint = base + pointsOverLvls;
+        sortedPointsPositions.push(pointsPositions[curPoint]);
+        
+        pointsOverLvls += 11;
+        
+        for (let k = 0; k < level; k++){
+            pointsOverLvls += addPerLevel[k % 2];
+        }
+
+        level += 1;
+        
+        if (level == maxLevel){
+            level = 0;
+            base += 1;
+            pointsOverLvls = 0;
+        }
+    }*/
+
+    pointsPositions.sort((a, b) => {
+        return toRadian(a["teta"]) - toRadian(b["teta"]) || b["radius"] - a["radius"];
+    });
+
+    sortedSenatorByGroup.sort((a, b) => {
+        let aIndex = Object.keys(groupsColors).indexOf(a["party_acronym"]);
+        let bIndex = Object.keys(groupsColors).indexOf(b["party_acronym"]);
+
+        if (aIndex > bIndex) return 1;
+        else if(aIndex < bIndex) return -1;
+        else return 0;
+    })
+
     const enterPoints = enter => enter.append("circle")
-    .attr("fill", (d) =>{
-        console.log(d["party_acronym"]);
-        return groupsColors[d["party_acronym"]];
+    .attr("fill", (data, index) =>{
+        //console.log(data["party_acronym"]);
+
+        if (data["party_acronym"] in groupsColors) return groupsColors[data["party_acronym"]];
+        
+        return "black";
     })
     .attr("r", circleRadius)
     .attr("cx", (data, index) => {
@@ -161,24 +226,35 @@ d3.csv("lista_parlamentar.csv", function(d){
         return pointsPositions[index]["y"];
     })
     .on("click", function(_, element) {
-        console.log(element);
-        buildCardUser(card, element); 
+        //console.log(element);
+        buildCardUser(d3.select("#card"), element); 
+        d3.select("#card")
+        .attr("transform", "translate("+ d3.select(this).attr("cx") + "," + d3.select(this).attr("cy") + ") translate(" + -cardWidth / 2 + ", -20)")
+    }).append("title").text((d) => {
+        return d["party_acronym"];
     });
     
+    /// adding points with the connected data
     d3.select("body").append("svg")
     .attr("id", "new_svg")
     .attr("width", width)
     .attr("height", height)
-    .append("g").selectAll("circle").data(senatorObjs).join(enterPoints)
-    .on("mouseenter", function() {
+    .append("g")
+    .attr("id", "view_group");
+
+    d3.select("#view_group").selectAll("circle").data(sortedSenatorByGroup).join(enterPoints);
+    
+    d3.selectAll("circle").on("mouseenter", function() {
         d3.select(this).style("stroke-width", "3");
         d3.select(this).style("stroke", "black");
     })
     .on("mouseleave", function() {
         d3.select(this).style("stroke-width", "0");
     });
-
-    d3.select("#new_svg").append("text")
+    
+    /// adding text based on style and  data points
+    /// if you use arrow function here the this pointer will be pointing to the navegator window
+    d3.select("#new_svg").select("g").append("text")
     .attr("x", textCenterPoint['x'])
     .attr("y", textCenterPoint['y'])
     .style("font-size", "" + textFontSize + "px")
@@ -188,14 +264,45 @@ d3.csv("lista_parlamentar.csv", function(d){
     .style("font-family", textFontFamily)
     .text("" + senatorObjs.length);
 
-    /// selecting all circles inside groups
-    /// if you use arrow function here the this pointer will be pointing to the navegator window
-    allGroups.selectAll("circle").on("mouseenter", function() {
-        d3.select(this).style("stroke-width", "3");
-        d3.select(this).style("stroke", "black");
-    });
+    /// adding card for click
+    d3.select("#new_svg").select("g").append("g")
+    .attr("id", "card")
+    .style("visibility", "hidden")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", cardWidth)
+    .attr("height", cardHeight)
+    .style("text-align", cardTextAlign)
+    .style("text-anchor", cardTextAnchor)
+    .style("font-family", cardTextFontFamily);
 
-    allGroups.selectAll("circle").on("mouseleave", function() {
-        d3.select(this).style("stroke-width", "0");
-    });
+    d3.select("#card").append("rect")
+    .style("fill", cardBackgroudColor)
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", cardWidth)
+    .attr("height", cardHeight)
+    .attr("rx", cardBoarderRadius);
+
+    d3.select("#card").append("image")
+    .attr("id", "card_img")
+    .attr("x", cardWidth / 2 - cardImageWidth / 2)
+    .attr("y", 2)
+    .attr("href", "")
+    .attr("width", cardImageWidth)
+    .attr("height", cardImageHeight)
+    
+    d3.select("#card").append("text")
+    .attr("id", "card_user_name")
+    .attr("x", cardUserNamePos["x"])
+    .attr("y", cardUserNamePos["y"])
+    .text("Some")
+
+    d3.select("#card").append("text")
+    .attr("id", "card_entourage_name")
+    .attr("x", cardEntourageNamePos["x"])
+    .attr("y", cardEntourageNamePos["y"])
+    .text("Text");
+
+    d3.select("#new_svg").attr("transform", "translate(700, 480) scale(2, 2)");
 });
