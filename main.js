@@ -116,7 +116,9 @@ d3.csv("lista_parlamentar.csv", function(d){
     var cardBackgroudColor = "#FFFFFF";
     var cardTextAlign = "center";
     var cardTextAnchor = "middle";
-    var cardTextFontFamily = "sans-serif"; 
+    var cardTextFontFamily = "sans-serif";
+    var cardExitButtonWidth = 25; 
+    var cardExitButtonHeight = 15; 
 
     var cardUserNamePos = {
         "x": cardWidth / 2,
@@ -127,6 +129,16 @@ d3.csv("lista_parlamentar.csv", function(d){
         "x": cardWidth / 2,
         "y": 140
     };
+
+    var cardExitButtonPos = {
+        "x": cardWidth - cardExitButtonWidth - 5,
+        "y": 5
+    }
+
+    var cardExitButtonTextPos = {
+        "x": cardWidth / 2,
+        "y": cardHeight / 2
+    }
 
     var circleRadius = 8;
     var textFontSize = 36;
@@ -244,7 +256,7 @@ d3.csv("lista_parlamentar.csv", function(d){
 
     d3.select("#view_group").selectAll("circle").data(sortedSenatorByGroup).join(enterPoints);
     
-    d3.selectAll("circle").on("mouseenter", function() {
+    d3.select("#view_group").selectAll("circle").on("mouseenter", function() {
         d3.select(this).style("stroke-width", "3");
         d3.select(this).style("stroke", "black");
     })
@@ -303,6 +315,17 @@ d3.csv("lista_parlamentar.csv", function(d){
     .attr("x", cardEntourageNamePos["x"])
     .attr("y", cardEntourageNamePos["y"])
     .text("Text");
+
+    d3.select("#card").append("g").append("rect")
+    .attr("x", cardExitButtonPos["x"])
+    .attr("y", cardExitButtonPos["y"])
+    .attr("width",cardExitButtonWidth)
+    .attr("height", cardExitButtonHeight)
+    .style("fill", "red")
+    .on("click", function(){
+        d3.select("#card").style("visibility", "hidden");
+    });
+    
 
     d3.select("#new_svg").attr("transform", "translate(700, 480) scale(2, 2)");
 });
