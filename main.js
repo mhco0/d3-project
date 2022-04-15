@@ -105,8 +105,8 @@ d3.csv("lista_parlamentar.csv", function(d){
     //console.log(gS);
 
     // style
-    var width = 720;
-    var height = 480;
+    var minWidth = 720;
+    var minHeight = 480;
     
     var cardWidth = 180;
     var cardHeight = 150;
@@ -246,10 +246,15 @@ d3.csv("lista_parlamentar.csv", function(d){
     /// adding points with the connected data
     d3.select("body").append("svg")
     .attr("id", "new_svg")
-    .attr("width", width)
-    .attr("height", height)
+    .attr("width", minWidth)
+    .attr("height", minHeight)
+    .style("width", "100%")
+    .style("height", "100%")
+    .style("display", "block")
+    .style("margin", "0 auto")
     .append("g")
-    .attr("id", "view_group");
+    .attr("id", "view_group")
+    .attr("transform", "translate(" + minWidth / 2 + "," + minHeight / 2 + ") scale(2, 2)");
 
     d3.select("#view_group").selectAll("circle").data(sortedSenatorByGroup).join(enterPoints);
     
@@ -325,6 +330,4 @@ d3.csv("lista_parlamentar.csv", function(d){
         d3.select("#card").style("visibility", "hidden");
     });
     
-    d3.select("#new_svg").style("width", "100%").style("height", "100%");
-    d3.select("#view_group").attr("transform", "translate("+ (d3.select("#new_svg").attr("width") / 2 - d3.select("#view_group").attr("width") / 2)  + "," + (d3.select("#new_svg").attr("height") / 2 - d3.select("#view_group").attr("width") / 2)  + ") scale(2, 2)");
 });
