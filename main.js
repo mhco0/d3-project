@@ -111,6 +111,8 @@ d3.csv("lista_parlamentar.csv", function(d){
     var cardWidth = 180;
     var cardHeight = 150;
     var cardBoarderRadius = 8;
+    var cardBorderColor = "black";
+    var cardBorderWidth = 50;
     var cardImageWidth = 100;
     var cardImageHeight = 100;
     var cardBackgroudColor = "#FFFFFF";
@@ -133,11 +135,6 @@ d3.csv("lista_parlamentar.csv", function(d){
     var cardExitButtonPos = {
         "x": cardWidth - cardExitButtonWidth - 5,
         "y": 5
-    }
-
-    var cardExitButtonTextPos = {
-        "x": cardWidth / 2,
-        "y": cardHeight / 2
     }
 
     var circleRadius = 8;
@@ -294,7 +291,9 @@ d3.csv("lista_parlamentar.csv", function(d){
     .attr("y", 0)
     .attr("width", cardWidth)
     .attr("height", cardHeight)
-    .attr("rx", cardBoarderRadius);
+    .attr("rx", cardBoarderRadius)
+    .style("border-color", cardBorderColor)
+    .style("border-width", cardBorderWidth + "px");
 
     d3.select("#card").append("image")
     .attr("id", "card_img")
@@ -302,13 +301,13 @@ d3.csv("lista_parlamentar.csv", function(d){
     .attr("y", 2)
     .attr("href", "")
     .attr("width", cardImageWidth)
-    .attr("height", cardImageHeight)
+    .attr("height", cardImageHeight);
     
     d3.select("#card").append("text")
     .attr("id", "card_user_name")
     .attr("x", cardUserNamePos["x"])
     .attr("y", cardUserNamePos["y"])
-    .text("Some")
+    .text("Some");
 
     d3.select("#card").append("text")
     .attr("id", "card_entourage_name")
@@ -326,6 +325,6 @@ d3.csv("lista_parlamentar.csv", function(d){
         d3.select("#card").style("visibility", "hidden");
     });
     
-
-    d3.select("#new_svg").attr("transform", "translate(700, 480) scale(2, 2)");
+    d3.select("#new_svg").style("width", "100%").style("height", "100%");
+    d3.select("#view_group").attr("transform", "translate("+ (d3.select("#new_svg").attr("width") / 2 - d3.select("#view_group").attr("width") / 2)  + "," + (d3.select("#new_svg").attr("height") / 2 - d3.select("#view_group").attr("width") / 2)  + ") scale(2, 2)");
 });
