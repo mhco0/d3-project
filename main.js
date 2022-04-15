@@ -115,7 +115,7 @@ d3.csv("lista_parlamentar.csv", function(d){
     var cardBorderWidth = 50;
     var cardImageWidth = 100;
     var cardImageHeight = 100;
-    var cardBackgroudColor = "#FFFFFF";
+    var cardBackgroudColor = "#D3D3D3";
     var cardTextAlign = "center";
     var cardTextAnchor = "middle";
     var cardTextFontFamily = "sans-serif";
